@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 기반 직원 건강관리 통합 전략 로드맵</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#F4F6FA;--surface:#FFFFFF;--surface2:#F0F3F8;--border:#E4E8F0;--border2:#CDD3E0;
+  --text:#18213A;--text2:#48536E;--text3:#8B95AE;
+  --navy:#1E3A5F;--teal:#0A9E6E;--teal-bg:#E4F5EE;--teal-txt:#065A3E;
+  --amber:#C97A0A;--amber-bg:#FEF3DC;--amber-txt:#7A4500;
+  --blue:#2563EB;--blue-bg:#EBF2FF;--blue-txt:#1034A0;
+  --red:#C0392B;--red-bg:#FDEDEC;--red-txt:#7B241C;
+  --gray-bg:#F0F3F8;--gray-txt:#6B7590;
+  --mono:'DM Mono',monospace;--sans:'Noto Sans KR',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;padding:22px 26px;font-size:14px;line-height:1.5}
+
+.header{display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:14px;padding:16px 22px;margin-bottom:16px}
+.header-left h1{font-size:18px;font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:3px}
+.header-left p{font-size:11px;color:rgba(255,255,255,.45);font-family:var(--mono)}
+.edit-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--sans);transition:background .15s}
+.edit-btn:hover{background:rgba(255,255,255,.22)}
+.edit-btn svg{width:13px;height:13px}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 17px;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-card.c-teal::before{background:var(--teal)}
+.kpi-card.c-blue::before{background:var(--blue)}
+.kpi-card.c-amber::before{background:var(--amber)}
+.kpi-card.c-navy::before{background:var(--navy)}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.kpi-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.kpi-val{font-size:30px;font-weight:900;line-height:1;letter-spacing:-.03em}
+.kpi-sub{font-size:12px;color:var(--text3);margin-top:6px}
+.sparkbar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:8px}
+.sparkbar-fill{height:100%;border-radius:2px;transition:width .7s}
+
+.grid2-6040{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:13px;margin-bottom:13px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:17px 19px}
+.card-title{font-size:14px;font-weight:900;color:var(--text);margin-bottom:2px}
+.card-sub{font-size:12px;color:var(--text3);margin-bottom:13px}
+
+/* 상담현황 */
+.consult-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.c-stat{background:var(--surface2);border-radius:10px;padding:13px 14px;text-align:center}
+.c-stat-val{font-size:28px;font-weight:900;line-height:1;margin-bottom:4px}
+.c-stat-label{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.c-stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.big-progress{margin-bottom:14px}
+.bp-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.bp-label{font-size:13px;font-weight:700;color:var(--text2)}
+.bp-pct{font-size:22px;font-weight:900;color:var(--teal);font-family:var(--mono)}
+.bp-bar{height:12px;background:var(--surface2);border-radius:6px;overflow:hidden}
+.bp-fill{height:100%;border-radius:6px;background:var(--teal);transition:width .8s}
+.bp-note{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.6}
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+/* 퇴사자 */
+.resigned-list{display:flex;flex-direction:column;gap:4px;max-height:195px;overflow-y:auto}
+.resigned-item{display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--red-bg);border-radius:6px;font-size:12px}
+.res-dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0}
+.res-name{font-weight:700;color:var(--red-txt);min-width:58px}
+.res-dept{color:var(--text3)}
+
+/* 질환 바 */
+.disease-bars{display:flex;flex-direction:column;gap:9px}
+.dbar-row{display:flex;align-items:center;gap:10px}
+.dbar-name{font-size:12px;font-weight:700;color:var(--text2);min-width:74px;text-align:right}
+.dbar-wrap{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.dbar-fill{height:100%;border-radius:4px;transition:width .8s}
+.dbar-count{font-size:12px;font-weight:700;font-family:var(--mono);min-width:34px;text-align:right}
+.dbar-pct{font-size:11px;color:var(--text3);font-family:var(--mono);min-width:36px;text-align:right}
+
+/* 로드맵 */
+.q-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.q-col{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.q-head{padding:8px 11px;display:flex;align-items:center;justify-content:space-between}
+.q-title{font-size:12px;font-weight:900}
+.q-body{padding:10px 11px}
+.q-task-name{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px}
+.q-item{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--text2);line-height:1.4;margin-bottom:5px}
+.ck{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.ck.done{background:var(--teal);border-color:var(--teal)}
+.ck.done svg{display:block}
+.ck svg{display:none;width:9px;height:9px}
+.done-text{text-decoration:line-through;color:var(--text3)}
+.q-prog-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin:10px 0 4px}
+.q-prog-fill{height:100%;border-radius:2px;transition:width .6s}
+.q-prog-label{font-size:10px;font-family:var(--mono);color:var(--text3)}
+
+/* 테이블 */
+.data-table{width:100%;border-collapse:collapse;margin-top:4px}
+.data-table thead tr{background:var(--navy)}
+.data-table thead th{font-size:11px;font-weight:700;color:rgba(255,255,255,.85);padding:8px 11px;text-align:left;font-family:var(--mono);letter-spacing:.04em;white-space:nowrap}
+.data-table thead th:first-child{border-radius:8px 0 0 8px}
+.data-table thead th:last-child{border-radius:0 8px 8px 0;text-align:right}
+.data-table tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.data-table tbody tr:last-child{border-bottom:none}
+.data-table tbody tr:hover{background:var(--surface2)}
+.data-table td{padding:10px 11px;font-size:13px;vertical-align:middle}
+.data-table td:last-child{text-align:right}
+.name-cell{display:flex;align-items:center;gap:8px}
+.num-circle{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;font-family:var(--mono);flex-shrink:0}
+.name-main{font-weight:700;font-size:13px;color:var(--text);display:block}
+.name-sub{font-size:11px;color:var(--text3);display:block;margin-top:1px}
+.tbar-wrap{width:70px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:7px}
+.tbar-fill{height:100%;border-radius:3px;transition:width .6s}
+
+.pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--mono);white-space:nowrap}
+.pill-done{background:var(--teal-bg);color:var(--teal-txt)}
+.pill-wip{background:var(--amber-bg);color:var(--amber-txt)}
+.pill-plan{background:var(--gray-bg);color:var(--gray-txt)}
+.pill-blue{background:var(--blue-bg);color:var(--blue-txt)}
+.info-note{background:var(--surface2);border-radius:8px;padding:9px 13px;font-size:12px;color:var(--text3);line-height:1.7;margin-top:11px}
+
+/* 모달 */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(18,28,50,.5);z-index:100;align-items:center;justify-content:center}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 30px;width:540px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal h2{font-size:16px;font-weight:900;margin-bottom:20px;color:var(--text)}
+.modal-section{margin-bottom:18px}
+.modal-section>label{display:block;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.modal-section select,.modal-section input[type="text"]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--text);font-family:var(--sans);outline:none}
+.modal-section select:focus,.modal-section input:focus{border-color:var(--teal)}
+.task-grid{display:flex;flex-direction:column;gap:5px}
+.task-row{display:flex;align-items:center;gap:10px;padding:7px 11px;background:var(--surface2);border-radius:8px;font-size:13px}
+.task-row input[type="checkbox"]{accent-color:var(--teal);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.task-row span{flex:1;color:var(--text2)}
+.task-row span.done{color:var(--text3);text-decoration:line-through}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.btn-cancel{background:transparent;border:1px solid var(--border2);border-radius:8px;padding:8px 18px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:var(--sans)}
+.btn-cancel:hover{background:var(--surface2)}
+.btn-save{background:var(--navy);border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--sans);transition:opacity .15s}
+.btn-save:hover{opacity:.85}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>AI 기반 직원 건강관리 통합 전략 로드맵</h1>
+    <p>F&F Corporation · 안전보건팀 · 마지막 업데이트: <span id="update-time">—</span></p>
+  </div>
+  <button class="edit-btn" onclick="openModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    진행상황 편집
+  </button>
+</div>
+
+<!-- KPI 요약 -->
+<div class="kpi-strip">
+  <div class="kpi-card c-teal">
+    <div class="kpi-top"><span class="kpi-label">전략 진행률</span><span class="pill pill-done" id="k1-badge">0% 달성</span></div>
+    <div class="kpi-val" id="k1-val" style="color:var(--teal)">0%</div>
+    <div class="sparkbar"><div class="sparkbar-fill" id="k1-bar" style="width:0%;background:var(--teal)"></div></div>
+    <div class="kpi-sub" id="k1-sub">0 / 16 과제 완료</div>
+  </div>
+  <div class="kpi-card c-blue">
+    <div class="kpi-top"><span class="kpi-label">건강상담 완료율</span><span class="pill pill-done">2025 완료</span></div>
+    <div class="kpi-val" style="color:var(--blue)">100%</div>
+    <div class="sparkbar"><div class="sparkbar-fill" style="width:100%;background:var(--blue)"></div></div>
+    <div class="kpi-sub">실대상 118명 전원 완료</div>
+  </div>
+  <div class="kpi-card c-amber">
+    <div class="kpi-top"><span class="kpi-label">유소견자 총인원</span></div>
+    <div class="kpi-val" style="color:var(--amber)">132<span style="font-size:15px;color:var(--text3);font-weight:400"> 명</span></div>
+    <div class="kpi-sub" style="margin-top:6px">상담대상 118 · 퇴사 14</div>
+  </div>
+  <div class="kpi-card c-navy">
+    <div class="kpi-top"><span class="kpi-label">최다 질환</span></div>
+    <div class="kpi-val" style="font-size:17px;padding-top:5px;color:var(--navy)">이상지질혈증</div>
+    <div class="kpi-sub" style="margin-top:6px">55명 · 전체의 41.7%</div>
+  </div>
+</div>
+
+<!-- 건강상담 현황 + 질환 분포 -->
+<div class="grid2-6040">
+
+  <div class="card">
+    <div class="card-title">2025년 유소견자 건강상담 현황</div>
+    <div class="card-sub">팀즈(Teams) 개인 메시지 발송 · 퇴사자 제외 실대상 기준 100% 완료</div>
+
+    <div class="consult-hero">
+      <div class="c-stat">
+        <div class="c-stat-val" style="color:var(--navy)">132</div>
+        <div class="c-stat-label">전체 명단</div>
+        <div class="c-stat-sub">건강검진 유소견자</div>
+      </div>
+      <div class="c-stat" style="border:2px solid var(--teal);background:var(--teal-bg)">
+        <div class="c-stat-val" style="color:var(--teal)">118</div>
+        <div class="c-stat-label" style="color:var(--teal-txt)">상담 완료</div>
+        <div class="c-stat-sub" style="color:var(--teal-txt);font-weight:700">실대상 100%</div>
+      </div>
+      <div class="c-stat">
+        <div class="c-stat-val" style="color:var(--red)">14</div>
+        <div class="c-stat-label">미상담</div>
+        <div class="c-stat-sub">퇴사 · 상담불가</div>
+      </div>
+    </div>
+
+    <div class="big-progress">
+      <div class="bp-top">
+        <span class="bp-label">실대상 기준 완료율</span>
+        <span class="bp-pct">100%</span>
+      </div>
+      <div class="bp-bar"><div class="bp-fill" style="width:100%"></div></div>
+      <div class="bp-note">
+        전체 132명 중 퇴사자 14명은 상담 불가 인원으로 제외 →<br>
+        실 상담 대상 <strong>118명 전원 완료</strong>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:7px">
+      미상담 인원 — 퇴사자 14명 · 부서별 현황
+    </div>
+    <div class="resigned-list">
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">디자인팀</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">2명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">마케팅팀</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">2명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">소싱팀</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">1명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">의류기획팀</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">1명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">e-BIZ팀</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">1명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">기획팀</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">1명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">IT담당</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">1명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">글로벌슈즈팀</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">1명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">공간기획팀</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">1명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">해외사업담당</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">1명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">Enterprise Solution팀</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">1명</span></div>
+      <div class="resigned-item"><div class="res-dot"></div><span class="res-dept">자금팀</span><span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red-txt);font-weight:700">1명</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">질환별 유소견자 분포</div>
+    <div class="card-sub">복수 질환 포함 · 전체 132명 기준</div>
+    <div class="disease-bars">
+      <div class="dbar-row">
+        <span class="dbar-name">이상지질혈증</span>
+        <div class="dbar-wrap"><div class="dbar-fill" style="width:100%;background:#2563EB"></div></div>
+        <span class="dbar-count" style="color:#2563EB">55명</span>
+        <span class="dbar-pct">41.7%</span>
+      </div>
+      <div class="dbar-row">
+        <span class="dbar-name">비만</span>
+        <div class="dbar-wrap"><div class="dbar-fill" style="width:70.9%;background:#0A9E6E"></div></div>
+        <span class="dbar-count" style="color:#0A9E6E">39명</span>
+        <span class="dbar-pct">29.5%</span>
+      </div>
+      <div class="dbar-row">
+        <span class="dbar-name">간장질환</span>
+        <div class="dbar-wrap"><div class="dbar-fill" style="width:47.3%;background:#C97A0A"></div></div>
+        <span class="dbar-count" style="color:#C97A0A">26명</span>
+        <span class="dbar-pct">19.7%</span>
+      </div>
+      <div class="dbar-row">
+        <span class="dbar-name">고혈압</span>
+        <div class="dbar-wrap"><div class="dbar-fill" style="width:40%;background:#C0392B"></div></div>
+        <span class="dbar-count" style="color:#C0392B">22명</span>
+        <span class="dbar-pct">16.7%</span>
+      </div>
+      <div class="dbar-row">
+        <span class="dbar-name">신장질환</span>
+        <div class="dbar-wrap"><div class="dbar-fill" style="width:25.5%;background:#7B3FA0"></div></div>
+        <span class="dbar-count" style="color:#7B3FA0">14명</span>
+        <span class="dbar-pct">10.6%</span>
+      </div>
+      <div class="dbar-row">
+        <span class="dbar-name">당뇨</span>
+        <div class="dbar-wrap"><div class="dbar-fill" style="width:21.8%;background:#1E3A5F"></div></div>
+        <span class="dbar-count" style="color:#1E3A5F">12명</span>
+        <span class="dbar-pct">9.1%</span>
+      </div>
+      <div class="dbar-row">
+        <span class="dbar-name">폐/흉부질환</span>
+        <div class="dbar-wrap"><div class="dbar-fill" style="width:7.3%;background:#8B95AE"></div></div>
+        <span class="dbar-count" style="color:#8B95AE">4명</span>
+        <span class="dbar-pct">3.0%</span>
+      </div>
+      <div class="dbar-row">
+        <span class="dbar-name">빈혈</span>
+        <div class="dbar-wrap"><div class="dbar-fill" style="width:7.3%;background:#8B95AE"></div></div>
+        <span class="dbar-count" style="color:#8B95AE">4명</span>
+        <span class="dbar-pct">3.0%</span>
+      </div>
+      <div class="dbar-row">
+        <span class="dbar-name">청력</span>
+        <div class="dbar-wrap"><div class="dbar-fill" style="width:3.6%;background:#CDD3E0"></div></div>
+        <span class="dbar-count" style="color:#8B95AE">2명</span>
+        <span class="dbar-pct">1.5%</span>
+      </div>
+    </div>
+    <div class="info-note">※ 1인 복수 질환 포함 · 건강구분 C 78명 · D2 29명 · C+D2 25명</div>
+  </div>
+
+</div>
+
+<!-- 로드맵 -->
+<div class="card" style="margin-bottom:13px">
+  <div class="card-title">분기별 실행 로드맵</div>
+  <div class="card-sub">AI 기반 건강관리 체계 구축 · 분기별 세부 과제 현황</div>
+  <div class="q-grid" id="q-grid"></div>
+</div>
+
+<!-- 파이프라인 + KPI -->
+<div class="grid2-6040">
+  <div class="card">
+    <div class="card-title">4단계 전략 파이프라인</div>
+    <div class="card-sub">데이터 수집 → AI 분석 → 개입 → 측정</div>
+    <table class="data-table">
+      <thead><tr><th>단계</th><th>진행</th><th>달성률</th></tr></thead>
+      <tbody id="pipe-tbody"></tbody>
+    </table>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:11px;border-top:1px solid var(--border)">
+      <span style="font-size:12px;color:var(--text3);font-family:var(--mono);min-width:60px">전체</span>
+      <div style="flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden">
+        <div id="total-bar" style="height:100%;border-radius:3px;background:var(--teal);transition:width .6s;width:0%"></div>
+      </div>
+      <span id="total-pct" style="font-size:14px;font-weight:900;font-family:var(--mono);color:var(--teal);min-width:36px;text-align:right">0%</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">KPI 목표 트래커</div>
+    <div class="card-sub">2분기 프로그램 운영 시작 후 실측 입력</div>
+    <table class="data-table">
+      <thead><tr><th>지표</th><th>목표</th><th>실적</th><th>상태</th></tr></thead>
+      <tbody id="kpi-tbody"></tbody>
+    </table>
+    <div class="info-note">편집 버튼으로 KPI 실적값 직접 입력 가능</div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal" onclick="handleBackdropClick(event)">
+  <div class="modal">
+    <h2>진행상황 편집</h2>
+    <div class="modal-section">
+      <label>현재 분기</label>
+      <select id="m-quarter">
+        <option value="0">1분기</option><option value="1">2분기</option>
+        <option value="2">3분기</option><option value="3">4분기</option>
+      </select>
+    </div>
+    <div class="modal-section">
+      <label>과제 완료 여부</label>
+      <div class="task-grid" id="m-tasks"></div>
+    </div>
+    <div class="modal-section">
+      <label>KPI 실적 입력 (측정 전이면 비워두세요)</label>
+      <div id="m-kpi-inputs" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-save" onclick="saveAndClose()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATE={currentQuarter:0,tasks:[
+  {q:0,label:'전략 기획서 완성',done:false},{q:0,label:'건강검진 DB 연동',done:false},
+  {q:0,label:'설문 자동화 구축',done:false},{q:0,label:'KPI 기준치 측정',done:false},
+  {q:1,label:'FIT ROOM 운동반',done:false},{q:1,label:'금연 AI 챗봇',done:false},
+  {q:1,label:'아워홈 식단 연계',done:false},{q:1,label:'맞춤 콘텐츠 발송',done:false},
+  {q:2,label:'AI 건강점수 산출',done:false},{q:2,label:'중간 KPI 측정',done:false},
+  {q:2,label:'프로그램 개선',done:false},{q:2,label:'위험군 재분류',done:false},
+  {q:3,label:'임원 성과 보고',done:false},{q:3,label:'차년도 전략 수립',done:false},
+  {q:3,label:'ESG 반영',done:false},{q:3,label:'건강문화 정착',done:false},
+],kpis:[
+  {name:'체지방 감소',goal:'-2%',actual:''},{name:'근골격 통증 감소',goal:'-20%',actual:''},
+  {name:'건강식 선택률',goal:'40%+',actual:''},{name:'금연 성공률',goal:'30%',actual:''},
+  {name:'건강점수 상승',goal:'+10점',actual:''},
+],lastUpdated:null};
+
+const QL=['1분기','2분기','3분기','4분기'];
+const QT=['데이터 수집 체계','프로그램 운영','분석 & 중간 점검','성과 보고 & 재설계'];
+const PIPE=[
+  {name:'데이터 수집',desc:'건강검진 · 설문 · 챗봇 · 식단',q:0},
+  {name:'AI 분석',desc:'건강점수 산출 · 위험군 분류',q:1},
+  {name:'개입 프로그램',desc:'운동 · 금연 · 식단 맞춤 운영',q:1},
+  {name:'성과 측정',desc:'체지방 · 통증 · KPI 추적',q:2},
+];
+
+function qD(q){return STATE.tasks.filter(t=>t.q===q&&t.done).length}
+function qT(q){return STATE.tasks.filter(t=>t.q===q).length}
+function tD(){return STATE.tasks.filter(t=>t.done).length}
+function pct(n,d){return d===0?0:Math.round(n/d*100)}
+function qSt(q){
+  const d=qD(q),t=qT(q);
+  if(q>STATE.currentQuarter)return'locked';
+  if(d===t&&t>0)return'done';
+  if(d>0)return'wip';
+  if(q===STATE.currentQuarter)return'start';
+  return'plan';
+}
+function pillH(st){
+  const m={done:['pill-done','완료'],wip:['pill-wip','진행 중'],start:['pill-wip','시작 예정'],plan:['pill-plan','예정'],locked:['pill-plan','잠김']};
+  const[c,l]=m[st]||m.plan; return`<span class="pill ${c}">${l}</span>`;
+}
+function ckSvg(d){return d?`<svg viewBox="0 0 10 8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 4,7 9,1"/></svg>`:''}
+function sc(st){
+  const m={
+    done:{h:'#E4F5EE',t:'var(--teal-txt)',b:'var(--teal)',n:'background:var(--teal-bg);color:var(--teal-txt)'},
+    wip:{h:'#FEF3DC',t:'var(--amber-txt)',b:'var(--amber)',n:'background:var(--amber-bg);color:var(--amber-txt)'},
+    start:{h:'#FEF3DC',t:'var(--amber-txt)',b:'var(--amber)',n:'background:var(--amber-bg);color:var(--amber-txt)'},
+    plan:{h:'var(--surface2)',t:'var(--text3)',b:'var(--border2)',n:'background:var(--gray-bg);color:var(--gray-txt)'},
+    locked:{h:'var(--surface2)',t:'var(--text3)',b:'var(--border2)',n:'background:var(--gray-bg);color:var(--gray-txt)'},
+  };return m[st];
+}
+
+function renderAll(){
+  const td=tD(),tt=STATE.tasks.length,tp=pct(td,tt);
+  document.getElementById('k1-val').textContent=tp+'%';
+  document.getElementById('k1-bar').style.width=tp+'%';
+  document.getElementById('k1-sub').textContent=td+' / '+tt+' 과제 완료';
+  document.getElementById('k1-badge').textContent=tp+'% 달성';
+
+  // 로드맵
+  const qg=document.getElementById('q-grid'); qg.innerHTML='';
+  for(let q=0;q<4;q++){
+    const st=qSt(q),d=qD(q),t=qT(q),p=pct(d,t),c=sc(st);
+    const items=STATE.tasks.filter(tk=>tk.q===q).map(tk=>`
+      <div class="q-item">
+        <div class="ck ${tk.done?'done':''}">${ckSvg(tk.done)}</div>
+        <span class="${tk.done?'done-text':''}">${tk.label}</span>
+      </div>`).join('');
+    qg.innerHTML+=`
+      <div class="q-col">
+        <div class="q-head" style="background:${c.h}">
+          <span class="q-title" style="color:${c.t}">${QL[q]}</span>${pillH(st)}
+        </div>
+        <div class="q-body">
+          <div class="q-task-name">${QT[q]}</div>${items}
+          <div class="q-prog-bar"><div class="q-prog-fill" style="width:${p}%;background:${c.b}"></div></div>
+          <div class="q-prog-label">${d} / ${t} 완료</div>
+        </div>
+      </div>`;
+  }
+
+  // 파이프라인
+  const pb=document.getElementById('pipe-tbody'); pb.innerHTML='';
+  PIPE.forEach((p,i)=>{
+    const tq=STATE.tasks.filter(t=>t.q===p.q),dq=tq.filter(t=>t.done).length,pp=pct(dq,tq.length);
+    let st='plan';
+    if(p.q<STATE.currentQuarter) st=pp===100?'done':'wip';
+    else if(p.q===STATE.currentQuarter) st=pp>0?'wip':'start';
+    const c=sc(st);
+    const bC=st==='done'?'var(--teal)':st==='wip'||st==='start'?'var(--amber)':'var(--border2)';
+    const pC=st==='done'?'color:var(--teal)':st==='wip'||st==='start'?'color:var(--amber)':'color:var(--text3)';
+    pb.innerHTML+=`
+      <tr>
+        <td><div class="name-cell">
+          <div class="num-circle" style="${c.n}">${i+1}</div>
+          <div><span class="name-main">${p.name}</span><span class="name-sub">${p.desc}</span></div>
+        </div></td>
+        <td><div class="tbar-wrap"><div class="tbar-fill" style="width:${pp}%;background:${bC}"></div></div></td>
+        <td style="text-align:right"><span style="font-size:12px;font-weight:700;font-family:var(--mono);${pC}">${pp}%</span> ${pillH(st)}</td>
+      </tr>`;
+  });
+  document.getElementById('total-bar').style.width=tp+'%';
+  document.getElementById('total-pct').textContent=tp+'%';
+
+  // KPI
+  const kb=document.getElementById('kpi-tbody'); kb.innerHTML='';
+  STATE.kpis.forEach(k=>{
+    const has=k.actual.trim()!=='';
+    kb.innerHTML+=`
+      <tr>
+        <td style="font-weight:700;font-size:13px">${k.name}</td>
+        <td style="font-size:12px;color:var(--text3);font-family:var(--mono)">${k.goal}</td>
+        <td style="font-size:13px;font-weight:900;font-family:var(--mono);color:${has?'var(--teal)':'var(--text3)'};text-align:right">${has?k.actual:'—'}</td>
+        <td style="text-align:right"><span class="pill ${has?'pill-done':'pill-plan'}">${has?'측정됨':'미시작'}</span></td>
+      </tr>`;
+  });
+
+  if(STATE.lastUpdated) document.getElementById('update-time').textContent=STATE.lastUpdated;
+}
+
+function openModal(){
+  document.getElementById('m-quarter').value=STATE.currentQuarter;
+  const tg=document.getElementById('m-tasks'); tg.innerHTML='';
+  STATE.tasks.forEach((t,i)=>{
+    tg.innerHTML+=`<div class="task-row">
+      <input type="checkbox" id="t${i}" ${t.done?'checked':''}>
+      <span id="tl${i}" class="${t.done?'done':''}">${QL[t.q]} · ${t.label}</span>
+    </div>`;
+  });
+  STATE.tasks.forEach((_,i)=>{
+    document.getElementById('t'+i).addEventListener('change',e=>{
+      document.getElementById('tl'+i).className=e.target.checked?'done':'';
+    });
+  });
+  const ki=document.getElementById('m-kpi-inputs'); ki.innerHTML='';
+  STATE.kpis.forEach((k,i)=>{
+    ki.innerHTML+=`<div style="display:flex;align-items:center;gap:10px">
+      <span style="flex:1;font-size:13px;color:var(--text2);font-weight:500">${k.name}</span>
+      <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">${k.goal}</span>
+      <input type="text" id="ki${i}" placeholder="예: -1.5%" value="${k.actual}"
+        style="width:88px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:13px;color:var(--text);font-family:var(--mono);text-align:right;outline:none">
+    </div>`;
+  });
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function handleBackdropClick(e){if(e.target===document.getElementById('modal'))closeModal()}
+function saveAndClose(){
+  STATE.currentQuarter=parseInt(document.getElementById('m-quarter').value);
+  STATE.tasks.forEach((_,i)=>{STATE.tasks[i].done=document.getElementById('t'+i).checked});
+  STATE.kpis.forEach((_,i)=>{const el=document.getElementById('ki'+i);if(el)STATE.kpis[i].actual=el.value.trim()});
+  const now=new Date();
+  STATE.lastUpdated=now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'})
+    +' '+now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  closeModal(); renderAll();
+}
+renderAll();
+</script>
+</body>
+</html>

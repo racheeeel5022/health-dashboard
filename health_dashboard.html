@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 기반 직원 건강관리 통합 전략 로드맵</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#F4F6FA;--surface:#FFFFFF;--surface2:#F0F3F8;--border:#E4E8F0;--border2:#CDD3E0;
+  --text:#18213A;--text2:#48536E;--text3:#8B95AE;
+  --navy:#1E3A5F;--teal:#0A9E6E;--teal-bg:#E4F5EE;--teal-txt:#065A3E;
+  --amber:#C97A0A;--amber-bg:#FEF3DC;--amber-txt:#7A4500;
+  --blue:#2563EB;--blue-bg:#EBF2FF;--blue-txt:#1034A0;
+  --red:#C0392B;--red-bg:#FDEDEC;--red-txt:#7B241C;
+  --purple:#7C3AED;--purple-bg:#F3EEFF;--purple-txt:#4C1D95;
+  --gray-bg:#F0F3F8;--gray-txt:#6B7590;
+  --mono:'DM Mono',monospace;--sans:'Noto Sans KR',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;padding:20px 24px;font-size:14px;line-height:1.5}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:14px;padding:15px 22px;margin-bottom:14px}
+.header-left h1{font-size:17px;font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:3px}
+.header-left p{font-size:11px;color:rgba(255,255,255,.45);font-family:var(--mono)}
+.header-right{display:flex;align-items:center;gap:8px}
+.ai-badge{display:flex;align-items:center;gap:5px;background:rgba(124,58,237,.25);border:1px solid rgba(124,58,237,.4);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;color:#C4B5FD}
+.ai-badge svg{width:12px;height:12px}
+.edit-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--sans);transition:background .15s}
+.edit-btn:hover{background:rgba(255,255,255,.22)}
+.edit-btn svg{width:13px;height:13px}
+
+/* AI 활용 배너 */
+.ai-banner{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.ai-card{border-radius:12px;padding:13px 16px;display:flex;align-items:flex-start;gap:11px;border:1px solid var(--border)}
+.ai-card.purple{background:var(--purple-bg);border-color:rgba(124,58,237,.2)}
+.ai-card.teal{background:var(--teal-bg);border-color:rgba(10,158,110,.2)}
+.ai-card.blue{background:var(--blue-bg);border-color:rgba(37,99,235,.2)}
+.ai-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-icon.purple{background:var(--purple)}
+.ai-icon.teal{background:var(--teal)}
+.ai-icon.blue{background:var(--blue)}
+.ai-icon svg{width:18px;height:18px}
+.ai-card-title{font-size:12px;font-weight:900;margin-bottom:3px}
+.ai-card.purple .ai-card-title{color:var(--purple-txt)}
+.ai-card.teal .ai-card-title{color:var(--teal-txt)}
+.ai-card.blue .ai-card-title{color:var(--blue-txt)}
+.ai-card-desc{font-size:11px;color:var(--text3);line-height:1.5}
+
+/* KPI STRIP */
+.kpi-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 15px;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-card.c-teal::before{background:var(--teal)}
+.kpi-card.c-blue::before{background:var(--blue)}
+.kpi-card.c-amber::before{background:var(--amber)}
+.kpi-card.c-navy::before{background:var(--navy)}
+.kpi-card.c-purple::before{background:var(--purple)}
+.kpi-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.kpi-val{font-size:26px;font-weight:900;line-height:1;letter-spacing:-.03em}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:5px}
+.sparkbar{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:7px}
+.sparkbar-fill{height:100%;border-radius:2px;transition:width .7s}
+
+/* 그리드 */
+.grid2-6040{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;margin-bottom:12px}
+.grid2-equal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.mb12{margin-bottom:12px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 18px}
+.card-title{font-size:13px;font-weight:900;color:var(--text);margin-bottom:2px}
+.card-sub{font-size:11px;color:var(--text3);margin-bottom:12px}
+
+/* 상담현황 컴팩트 */
+.consult-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:11px}
+.cs{background:var(--surface2);border-radius:8px;padding:10px 12px;text-align:center}
+.cs-val{font-size:22px;font-weight:900;line-height:1;margin-bottom:3px}
+.cs-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+.cs-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.prog-label{font-size:12px;font-weight:700;color:var(--text2);min-width:90px}
+.prog-bar{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;transition:width .8s}
+.prog-pct{font-size:13px;font-weight:900;font-family:var(--mono);min-width:38px;text-align:right}
+
+/* 퇴사자 컴팩트 */
+.res-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3px}
+.res-item{display:flex;align-items:center;gap:6px;padding:4px 7px;background:var(--red-bg);border-radius:5px;font-size:11px}
+.res-dot{width:5px;height:5px;border-radius:50%;background:var(--red);flex-shrink:0}
+.res-dept{color:var(--red-txt);font-weight:700;flex:1}
+.res-cnt{font-family:var(--mono);font-size:10px;color:var(--red-txt);font-weight:700}
+
+/* 질환 바 */
+.disease-bars{display:flex;flex-direction:column;gap:7px}
+.dbar-row{display:flex;align-items:center;gap:8px}
+.dbar-name{font-size:11px;font-weight:700;color:var(--text2);min-width:70px;text-align:right}
+.dbar-wrap{flex:1;height:7px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.dbar-fill{height:100%;border-radius:4px;transition:width .8s}
+.dbar-count{font-size:11px;font-weight:700;font-family:var(--mono);min-width:30px;text-align:right}
+.dbar-pct{font-size:10px;color:var(--text3);font-family:var(--mono);min-width:34px;text-align:right}
+
+/* 근골격계 */
+.msk-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.msk-step{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.msk-head{padding:8px 11px;display:flex;align-items:center;gap:7px}
+.msk-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;font-family:var(--mono);flex-shrink:0}
+.msk-head-title{font-size:12px;font-weight:900}
+.msk-body{padding:9px 11px;display:flex;flex-direction:column;gap:5px}
+.msk-item{display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--text2);line-height:1.4}
+.msk-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.msk-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:6px}
+
+/* 로드맵 */
+.q-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.q-col{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.q-head{padding:8px 11px;display:flex;align-items:center;justify-content:space-between}
+.q-title{font-size:12px;font-weight:900}
+.q-body{padding:9px 11px}
+.q-task-name{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:7px}
+.q-item{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:var(--text2);line-height:1.4;margin-bottom:5px}
+.ck{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.ck.done{background:var(--teal);border-color:var(--teal)}
+.ck.done svg{display:block}
+.ck svg{display:none;width:8px;height:8px}
+.done-text{text-decoration:line-through;color:var(--text3)}
+.q-prog-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin:9px 0 3px}
+.q-prog-fill{height:100%;border-radius:2px;transition:width .6s}
+.q-prog-label{font-size:10px;font-family:var(--mono);color:var(--text3)}
+
+/* 테이블 */
+.data-table{width:100%;border-collapse:collapse}
+.data-table thead tr{background:var(--navy)}
+.data-table thead th{font-size:11px;font-weight:700;color:rgba(255,255,255,.85);padding:8px 10px;text-align:left;font-family:var(--mono);white-space:nowrap}
+.data-table thead th:first-child{border-radius:8px 0 0 8px}
+.data-table thead th:last-child{border-radius:0 8px 8px 0;text-align:right}
+.data-table tbody tr{border-bottom:1px solid var(--border)}
+.data-table tbody tr:last-child{border-bottom:none}
+.data-table tbody tr:hover{background:var(--surface2)}
+.data-table td{padding:9px 10px;font-size:12px;vertical-align:middle}
+.data-table td:last-child{text-align:right}
+.name-cell{display:flex;align-items:center;gap:8px}
+.num-circle{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;font-family:var(--mono);flex-shrink:0}
+.name-main{font-weight:700;font-size:12px;color:var(--text);display:block}
+.name-sub{font-size:10px;color:var(--text3);display:block;margin-top:1px}
+.tbar-wrap{width:65px;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px}
+.tbar-fill{height:100%;border-radius:2px;transition:width .6s}
+
+.pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;font-family:var(--mono);white-space:nowrap}
+.pill-done{background:var(--teal-bg);color:var(--teal-txt)}
+.pill-wip{background:var(--amber-bg);color:var(--amber-txt)}
+.pill-plan{background:var(--gray-bg);color:var(--gray-txt)}
+.pill-blue{background:var(--blue-bg);color:var(--blue-txt)}
+.pill-purple{background:var(--purple-bg);color:var(--purple-txt)}
+.info-note{background:var(--surface2);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text3);line-height:1.6;margin-top:10px}
+.divider{height:1px;background:var(--border);margin:10px 0}
+
+/* 모달 */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(18,28,50,.5);z-index:100;align-items:center;justify-content:center}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px 28px;width:540px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal h2{font-size:15px;font-weight:900;margin-bottom:18px;color:var(--text)}
+.modal-section{margin-bottom:16px}
+.modal-section>label{display:block;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.modal-section select,.modal-section input[type="text"]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);font-family:var(--sans);outline:none}
+.modal-section select:focus,.modal-section input:focus{border-color:var(--teal)}
+.task-grid{display:flex;flex-direction:column;gap:4px}
+.task-row{display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--surface2);border-radius:7px;font-size:12px}
+.task-row input[type="checkbox"]{accent-color:var(--teal);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.task-row span{flex:1;color:var(--text2)}
+.task-row span.done{color:var(--text3);text-decoration:line-through}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.btn-cancel{background:transparent;border:1px solid var(--border2);border-radius:8px;padding:7px 16px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;font-family:var(--sans)}
+.btn-cancel:hover{background:var(--surface2)}
+.btn-save{background:var(--navy);border:none;border-radius:8px;padding:7px 18px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--sans);transition:opacity .15s}
+.btn-save:hover{opacity:.85}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>AI 기반 직원 건강관리 통합 전략 로드맵</h1>
+    <p>F&F Corporation · 안전보건팀 · 마지막 업데이트: <span id="update-time">—</span></p>
+  </div>
+  <div class="header-right">
+    <div class="ai-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+      AI · Power Automate 연계 운영
+    </div>
+    <button class="edit-btn" onclick="openModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      편집
+    </button>
+  </div>
+</div>
+
+<!-- AI 활용 배너 -->
+<div class="ai-banner">
+  <div class="ai-card purple">
+    <div class="ai-icon purple">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 2a10 10 0 1010 10"/><path d="M12 6v6l4 2"/><circle cx="18" cy="6" r="3" fill="#fff" stroke="none"/></svg>
+    </div>
+    <div>
+      <div class="ai-card-title">AI 위험군 자동 분류</div>
+      <div class="ai-card-desc">건강검진 데이터 기반 질환별 위험군 자동 식별 및 사후관리 대상자 분류</div>
+    </div>
+  </div>
+  <div class="ai-card teal">
+    <div class="ai-icon teal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+    </div>
+    <div>
+      <div class="ai-card-title">Power Automate 자동 상담</div>
+      <div class="ai-card-desc">유소견자 118명 전원 — Teams 개인 메시지 + 질환별 맞춤 교육자료 자동 발송 완료</div>
+    </div>
+  </div>
+  <div class="ai-card blue">
+    <div class="ai-icon blue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </div>
+    <div>
+      <div class="ai-card-title">데이터 기반 성과 관리</div>
+      <div class="ai-card-desc">근골격계 조사 · 건강검진 · 설문 데이터를 통합하여 정량 KPI 기반 성과 측정</div>
+    </div>
+  </div>
+</div>
+
+<!-- KPI 요약 5개 -->
+<div class="kpi-strip">
+  <div class="kpi-card c-teal">
+    <div class="kpi-label">전략 진행률</div>
+    <div class="kpi-val" id="k1-val" style="color:var(--teal)">0%</div>
+    <div class="sparkbar"><div class="sparkbar-fill" id="k1-bar" style="width:0%;background:var(--teal)"></div></div>
+    <div class="kpi-sub" id="k1-sub">0 / 16 과제</div>
+  </div>
+  <div class="kpi-card c-blue">
+    <div class="kpi-label">건강상담 완료</div>
+    <div class="kpi-val" style="color:var(--blue)">100%</div>
+    <div class="sparkbar"><div class="sparkbar-fill" style="width:100%;background:var(--blue)"></div></div>
+    <div class="kpi-sub">118명 · Power Automate</div>
+  </div>
+  <div class="kpi-card c-amber">
+    <div class="kpi-label">유소견자</div>
+    <div class="kpi-val" style="color:var(--amber)">132<span style="font-size:13px;color:var(--text3);font-weight:400">명</span></div>
+    <div class="kpi-sub" style="margin-top:5px">상담대상 118 · 퇴사 14</div>
+  </div>
+  <div class="kpi-card c-purple">
+    <div class="kpi-label">최다 질환</div>
+    <div class="kpi-val" style="font-size:15px;padding-top:4px;color:var(--purple)">이상지질혈증</div>
+    <div class="kpi-sub" style="margin-top:5px">55명 · 41.7%</div>
+  </div>
+  <div class="kpi-card c-navy">
+    <div class="kpi-label">근골격계 관리</div>
+    <div class="kpi-val" style="font-size:15px;padding-top:4px;color:var(--navy)">운동 · 물리치료</div>
+    <div class="kpi-sub" style="margin-top:5px">2분기 프로그램 예정</div>
+  </div>
+</div>
+
+<!-- 건강상담 현황 (컴팩트) + 질환 분포 -->
+<div class="grid2-6040">
+  <div class="card">
+    <div class="card-title">2025 유소견자 건강상담 현황</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:9px 13px;background:var(--blue-bg);border-radius:8px;border-left:3px solid var(--blue)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span style="font-size:13px;font-weight:900;color:var(--blue-txt);letter-spacing:-.01em">Power Automate</span>
+      <span style="font-size:12px;font-weight:700;color:var(--blue-txt)">— 질환별 맞춤 교육자료 이메일 자동 발송 완료</span>
+      <span style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--teal-bg);color:var(--teal-txt);white-space:nowrap">118명 전원</span>
+    </div>
+
+    <div class="consult-row">
+      <div class="cs">
+        <div class="cs-val" style="color:var(--navy)">132</div>
+        <div class="cs-label">전체 명단</div>
+        <div class="cs-sub">건강검진 유소견자</div>
+      </div>
+      <div class="cs" style="border:2px solid var(--teal);background:var(--teal-bg)">
+        <div class="cs-val" style="color:var(--teal)">118</div>
+        <div class="cs-label" style="color:var(--teal-txt)">상담 완료</div>
+        <div class="cs-sub" style="color:var(--teal-txt);font-weight:700">실대상 100%</div>
+      </div>
+      <div class="cs">
+        <div class="cs-val" style="color:var(--red)">14</div>
+        <div class="cs-label">미상담</div>
+        <div class="cs-sub">퇴사 · 상담불가</div>
+      </div>
+    </div>
+
+    <div class="prog-row">
+      <span class="prog-label">실대상 완료율</span>
+      <div class="prog-bar"><div class="prog-fill" style="width:100%;background:var(--teal)"></div></div>
+      <span class="prog-pct" style="color:var(--teal)">100%</span>
+    </div>
+
+    <div class="divider"></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--red-bg);border-radius:8px">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
+      <span style="font-size:13px;font-weight:700;color:var(--red-txt)">퇴사자 14명 — 상담 불가 처리</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--red-txt);font-family:var(--mono)">실대상 제외</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">질환별 유소견자 분포</div>
+    <div class="card-sub">복수 질환 포함 · 132명 기준</div>
+    <div class="disease-bars">
+      <div class="dbar-row"><span class="dbar-name">이상지질혈증</span><div class="dbar-wrap"><div class="dbar-fill" style="width:100%;background:#2563EB"></div></div><span class="dbar-count" style="color:#2563EB">55명</span><span class="dbar-pct">41.7%</span></div>
+      <div class="dbar-row"><span class="dbar-name">비만</span><div class="dbar-wrap"><div class="dbar-fill" style="width:70.9%;background:#0A9E6E"></div></div><span class="dbar-count" style="color:#0A9E6E">39명</span><span class="dbar-pct">29.5%</span></div>
+      <div class="dbar-row"><span class="dbar-name">간장질환</span><div class="dbar-wrap"><div class="dbar-fill" style="width:47.3%;background:#C97A0A"></div></div><span class="dbar-count" style="color:#C97A0A">26명</span><span class="dbar-pct">19.7%</span></div>
+      <div class="dbar-row"><span class="dbar-name">고혈압</span><div class="dbar-wrap"><div class="dbar-fill" style="width:40%;background:#C0392B"></div></div><span class="dbar-count" style="color:#C0392B">22명</span><span class="dbar-pct">16.7%</span></div>
+      <div class="dbar-row"><span class="dbar-name">신장질환</span><div class="dbar-wrap"><div class="dbar-fill" style="width:25.5%;background:#7C3AED"></div></div><span class="dbar-count" style="color:#7C3AED">14명</span><span class="dbar-pct">10.6%</span></div>
+      <div class="dbar-row"><span class="dbar-name">당뇨</span><div class="dbar-wrap"><div class="dbar-fill" style="width:21.8%;background:#1E3A5F"></div></div><span class="dbar-count" style="color:#1E3A5F">12명</span><span class="dbar-pct">9.1%</span></div>
+      <div class="dbar-row"><span class="dbar-name">폐/흉부질환</span><div class="dbar-wrap"><div class="dbar-fill" style="width:7.3%;background:#8B95AE"></div></div><span class="dbar-count" style="color:#8B95AE">4명</span><span class="dbar-pct">3.0%</span></div>
+      <div class="dbar-row"><span class="dbar-name">빈혈</span><div class="dbar-wrap"><div class="dbar-fill" style="width:7.3%;background:#8B95AE"></div></div><span class="dbar-count" style="color:#8B95AE">4명</span><span class="dbar-pct">3.0%</span></div>
+      <div class="dbar-row"><span class="dbar-name">청력</span><div class="dbar-wrap"><div class="dbar-fill" style="width:3.6%;background:#CDD3E0"></div></div><span class="dbar-count" style="color:#8B95AE">2명</span><span class="dbar-pct">1.5%</span></div>
+    </div>
+    <div class="info-note">※ 1인 복수 질환 포함 · C 78명 · D2 29명 · C+D2 25명</div>
+  </div>
+</div>
+
+<!-- 근골격계 관리 프로그램 -->
+<div class="card mb12">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+    <div class="card-title">근골격계 통증 관리 프로그램</div>
+    <span class="pill pill-purple">2분기 시작 예정</span>
+  </div>
+  <div class="card-sub">근골격계유해요인 조사 → 통증 유발자 선별 → AI 맞춤 개입 → 효과 측정</div>
+  <div class="msk-steps">
+    <div class="msk-step">
+      <div class="msk-head" style="background:#F3EEFF">
+        <div class="msk-num" style="background:var(--purple);color:#fff">1</div>
+        <span class="msk-head-title" style="color:var(--purple-txt)">조사 · 선별</span>
+      </div>
+      <div class="msk-body">
+        <div class="msk-item"><div class="msk-dot" style="background:var(--purple)"></div>근골격계유해요인 조사 실시</div>
+        <div class="msk-item"><div class="msk-dot" style="background:var(--purple)"></div>통증 부위·강도 데이터 수집</div>
+        <div class="msk-item"><div class="msk-dot" style="background:var(--purple)"></div>직무별 위험군 AI 자동 분류</div>
+        <span class="msk-tag" style="background:var(--purple-bg);color:var(--purple-txt)">1분기 완료</span>
+      </div>
+    </div>
+    <div class="msk-step">
+      <div class="msk-head" style="background:var(--teal-bg)">
+        <div class="msk-num" style="background:var(--teal);color:#fff">2</div>
+        <span class="msk-head-title" style="color:var(--teal-txt)">운동 프로그램</span>
+      </div>
+      <div class="msk-body">
+        <div class="msk-item"><div class="msk-dot" style="background:var(--teal)"></div>FIT ROOM 맞춤 운동 배정</div>
+        <div class="msk-item"><div class="msk-dot" style="background:var(--teal)"></div>통증 부위별 스트레칭 가이드</div>
+        <div class="msk-item"><div class="msk-dot" style="background:var(--teal)"></div>AI 추천 운동 루틴 자동 발송</div>
+        <span class="msk-tag" style="background:var(--teal-bg);color:var(--teal-txt)">2분기 시작</span>
+      </div>
+    </div>
+    <div class="msk-step">
+      <div class="msk-head" style="background:var(--blue-bg)">
+        <div class="msk-num" style="background:var(--blue);color:#fff">3</div>
+        <span class="msk-head-title" style="color:var(--blue-txt)">물리치료 연계</span>
+      </div>
+      <div class="msk-body">
+        <div class="msk-item"><div class="msk-dot" style="background:var(--blue)"></div>중증 통증자 물리치료 연계</div>
+        <div class="msk-item"><div class="msk-dot" style="background:var(--blue)"></div>사내 / 외부 제휴 치료 제공</div>
+        <div class="msk-item"><div class="msk-dot" style="background:var(--blue)"></div>치료 이력 DB 자동 기록</div>
+        <span class="msk-tag" style="background:var(--blue-bg);color:var(--blue-txt)">2분기 시작</span>
+      </div>
+    </div>
+    <div class="msk-step">
+      <div class="msk-head" style="background:var(--amber-bg)">
+        <div class="msk-num" style="background:var(--amber);color:#fff">4</div>
+        <span class="msk-head-title" style="color:var(--amber-txt)">효과 측정</span>
+      </div>
+      <div class="msk-body">
+        <div class="msk-item"><div class="msk-dot" style="background:var(--amber)"></div>통증 설문 재조사 (Before/After)</div>
+        <div class="msk-item"><div class="msk-dot" style="background:var(--amber)"></div>근골격계 개선율 KPI 산출</div>
+        <div class="msk-item"><div class="msk-dot" style="background:var(--amber)"></div>임원 보고용 성과 시각화</div>
+        <span class="msk-tag" style="background:var(--amber-bg);color:var(--amber-txt)">3분기 측정</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 분기별 로드맵 -->
+<div class="card mb12">
+  <div class="card-title">분기별 실행 로드맵</div>
+  <div class="card-sub">AI 기반 건강관리 체계 구축 · 분기별 세부 과제 현황</div>
+  <div class="q-grid" id="q-grid"></div>
+</div>
+
+<!-- 파이프라인 + KPI -->
+<div class="grid2-6040">
+  <div class="card">
+    <div class="card-title">4단계 전략 파이프라인</div>
+    <div class="card-sub">데이터 수집 → AI 분석 → 개입 → 측정</div>
+    <table class="data-table">
+      <thead><tr><th>단계</th><th>진행</th><th>달성률</th></tr></thead>
+      <tbody id="pipe-tbody"></tbody>
+    </table>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:11px;padding-top:10px;border-top:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--text3);font-family:var(--mono);min-width:60px">전체</span>
+      <div style="flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden"><div id="total-bar" style="height:100%;border-radius:2px;background:var(--teal);transition:width .6s;width:0%"></div></div>
+      <span id="total-pct" style="font-size:13px;font-weight:900;font-family:var(--mono);color:var(--teal);min-width:34px;text-align:right">0%</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">KPI 목표 트래커</div>
+    <div class="card-sub">정량 KPI · 2분기 시작 후 실측 입력</div>
+    <table class="data-table">
+      <thead><tr><th>지표</th><th>목표</th><th>실적</th><th>상태</th></tr></thead>
+      <tbody id="kpi-tbody"></tbody>
+    </table>
+    <div class="info-note">편집 버튼으로 KPI 실적값 직접 입력 가능</div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal" onclick="handleBackdropClick(event)">
+  <div class="modal">
+    <h2>진행상황 편집</h2>
+    <div class="modal-section">
+      <label>현재 분기</label>
+      <select id="m-quarter">
+        <option value="0">1분기</option><option value="1">2분기</option>
+        <option value="2">3분기</option><option value="3">4분기</option>
+      </select>
+    </div>
+    <div class="modal-section">
+      <label>과제 완료 여부</label>
+      <div class="task-grid" id="m-tasks"></div>
+    </div>
+    <div class="modal-section">
+      <label>KPI 실적 입력</label>
+      <div id="m-kpi-inputs" style="display:flex;flex-direction:column;gap:7px"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-save" onclick="saveAndClose()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATE={currentQuarter:0,tasks:[
+  {q:0,label:'전략 기획서 완성',done:false},{q:0,label:'건강검진 DB 연동',done:false},
+  {q:0,label:'근골격계 조사 DB화',done:false},{q:0,label:'KPI 기준치 측정',done:false},
+  {q:1,label:'FIT ROOM 운동반',done:false},{q:1,label:'물리치료 연계',done:false},
+  {q:1,label:'금연 AI 챗봇',done:false},{q:1,label:'아워홈 식단 연계',done:false},
+  {q:2,label:'AI 건강점수 산출',done:false},{q:2,label:'근골격계 개선율 측정',done:false},
+  {q:2,label:'중간 KPI 측정',done:false},{q:2,label:'프로그램 개선',done:false},
+  {q:3,label:'임원 성과 보고',done:false},{q:3,label:'차년도 전략 수립',done:false},
+  {q:3,label:'ESG 반영',done:false},{q:3,label:'건강문화 정착',done:false},
+],kpis:[
+  {name:'체지방 감소',goal:'-2%',actual:''},{name:'근골격 통증 감소',goal:'-20%',actual:''},
+  {name:'건강식 선택률',goal:'40%+',actual:''},{name:'금연 성공률',goal:'30%',actual:''},
+  {name:'건강점수 상승',goal:'+10점',actual:''},
+],lastUpdated:null};
+
+const QL=['1분기','2분기','3분기','4분기'];
+const QT=['데이터 수집 · 기반 구축','개입 프로그램 운영','분석 & 중간 점검','성과 보고 & 재설계'];
+const PIPE=[
+  {name:'데이터 수집',desc:'건강검진 · 근골격계 조사 · 설문',q:0},
+  {name:'AI 분석',desc:'건강점수 산출 · 위험군 분류',q:1},
+  {name:'개입 프로그램',desc:'운동 · 물리치료 · 금연 · 식단',q:1},
+  {name:'성과 측정',desc:'통증 · 체지방 · KPI 추적',q:2},
+];
+
+function qD(q){return STATE.tasks.filter(t=>t.q===q&&t.done).length}
+function qT(q){return STATE.tasks.filter(t=>t.q===q).length}
+function tD(){return STATE.tasks.filter(t=>t.done).length}
+function pct(n,d){return d===0?0:Math.round(n/d*100)}
+function qSt(q){
+  const d=qD(q),t=qT(q);
+  if(q>STATE.currentQuarter)return'locked';
+  if(d===t&&t>0)return'done';
+  if(d>0)return'wip';
+  if(q===STATE.currentQuarter)return'start';
+  return'plan';
+}
+function pillH(st){
+  const m={done:['pill-done','완료'],wip:['pill-wip','진행 중'],start:['pill-wip','시작 예정'],plan:['pill-plan','예정'],locked:['pill-plan','잠김']};
+  const[c,l]=m[st]||m.plan;return`<span class="pill ${c}">${l}</span>`;
+}
+function ckSvg(d){return d?`<svg viewBox="0 0 10 8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 4,7 9,1"/></svg>`:''}
+function sc(st){
+  return{
+    done:{h:'#E4F5EE',t:'var(--teal-txt)',b:'var(--teal)',n:'background:var(--teal-bg);color:var(--teal-txt)'},
+    wip:{h:'#FEF3DC',t:'var(--amber-txt)',b:'var(--amber)',n:'background:var(--amber-bg);color:var(--amber-txt)'},
+    start:{h:'#FEF3DC',t:'var(--amber-txt)',b:'var(--amber)',n:'background:var(--amber-bg);color:var(--amber-txt)'},
+    plan:{h:'var(--surface2)',t:'var(--text3)',b:'var(--border2)',n:'background:var(--gray-bg);color:var(--gray-txt)'},
+    locked:{h:'var(--surface2)',t:'var(--text3)',b:'var(--border2)',n:'background:var(--gray-bg);color:var(--gray-txt)'},
+  }[st];
+}
+
+function renderAll(){
+  const td=tD(),tt=STATE.tasks.length,tp=pct(td,tt);
+  document.getElementById('k1-val').textContent=tp+'%';
+  document.getElementById('k1-bar').style.width=tp+'%';
+  document.getElementById('k1-sub').textContent=td+' / '+tt+' 과제';
+
+  const qg=document.getElementById('q-grid');qg.innerHTML='';
+  for(let q=0;q<4;q++){
+    const st=qSt(q),d=qD(q),t=qT(q),p=pct(d,t),c=sc(st);
+    const items=STATE.tasks.filter(tk=>tk.q===q).map(tk=>`
+      <div class="q-item">
+        <div class="ck ${tk.done?'done':''}">${ckSvg(tk.done)}</div>
+        <span class="${tk.done?'done-text':''}">${tk.label}</span>
+      </div>`).join('');
+    qg.innerHTML+=`
+      <div class="q-col">
+        <div class="q-head" style="background:${c.h}">
+          <span class="q-title" style="color:${c.t}">${QL[q]}</span>${pillH(st)}
+        </div>
+        <div class="q-body">
+          <div class="q-task-name">${QT[q]}</div>${items}
+          <div class="q-prog-bar"><div class="q-prog-fill" style="width:${p}%;background:${c.b}"></div></div>
+          <div class="q-prog-label">${d} / ${t} 완료</div>
+        </div>
+      </div>`;
+  }
+
+  const pb=document.getElementById('pipe-tbody');pb.innerHTML='';
+  PIPE.forEach((p,i)=>{
+    const tq=STATE.tasks.filter(t=>t.q===p.q),dq=tq.filter(t=>t.done).length,pp=pct(dq,tq.length);
+    let st='plan';
+    if(p.q<STATE.currentQuarter)st=pp===100?'done':'wip';
+    else if(p.q===STATE.currentQuarter)st=pp>0?'wip':'start';
+    const c=sc(st);
+    const bC=st==='done'?'var(--teal)':st==='wip'||st==='start'?'var(--amber)':'var(--border2)';
+    const pC=st==='done'?'color:var(--teal)':st==='wip'||st==='start'?'color:var(--amber)':'color:var(--text3)';
+    pb.innerHTML+=`
+      <tr>
+        <td><div class="name-cell">
+          <div class="num-circle" style="${c.n}">${i+1}</div>
+          <div><span class="name-main">${p.name}</span><span class="name-sub">${p.desc}</span></div>
+        </div></td>
+        <td><div class="tbar-wrap"><div class="tbar-fill" style="width:${pp}%;background:${bC}"></div></div></td>
+        <td><span style="font-size:11px;font-weight:700;font-family:var(--mono);${pC}">${pp}%</span> ${pillH(st)}</td>
+      </tr>`;
+  });
+  document.getElementById('total-bar').style.width=tp+'%';
+  document.getElementById('total-pct').textContent=tp+'%';
+
+  const kb=document.getElementById('kpi-tbody');kb.innerHTML='';
+  STATE.kpis.forEach(k=>{
+    const has=k.actual.trim()!=='';
+    kb.innerHTML+=`
+      <tr>
+        <td style="font-weight:700;font-size:12px">${k.name}</td>
+        <td style="font-size:11px;color:var(--text3);font-family:var(--mono)">${k.goal}</td>
+        <td style="font-size:12px;font-weight:900;font-family:var(--mono);color:${has?'var(--teal)':'var(--text3)'};text-align:right">${has?k.actual:'—'}</td>
+        <td style="text-align:right"><span class="pill ${has?'pill-done':'pill-plan'}">${has?'측정됨':'미시작'}</span></td>
+      </tr>`;
+  });
+
+  if(STATE.lastUpdated)document.getElementById('update-time').textContent=STATE.lastUpdated;
+}
+
+function openModal(){
+  document.getElementById('m-quarter').value=STATE.currentQuarter;
+  const tg=document.getElementById('m-tasks');tg.innerHTML='';
+  STATE.tasks.forEach((t,i)=>{
+    tg.innerHTML+=`<div class="task-row">
+      <input type="checkbox" id="t${i}" ${t.done?'checked':''}>
+      <span id="tl${i}" class="${t.done?'done':''}">${QL[t.q]} · ${t.label}</span>
+    </div>`;
+  });
+  STATE.tasks.forEach((_,i)=>{
+    document.getElementById('t'+i).addEventListener('change',e=>{
+      document.getElementById('tl'+i).className=e.target.checked?'done':'';
+    });
+  });
+  const ki=document.getElementById('m-kpi-inputs');ki.innerHTML='';
+  STATE.kpis.forEach((k,i)=>{
+    ki.innerHTML+=`<div style="display:flex;align-items:center;gap:10px">
+      <span style="flex:1;font-size:12px;color:var(--text2);font-weight:500">${k.name}</span>
+      <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">${k.goal}</span>
+      <input type="text" id="ki${i}" placeholder="예: -1.5%" value="${k.actual}"
+        style="width:85px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 9px;font-size:12px;color:var(--text);font-family:var(--mono);text-align:right;outline:none">
+    </div>`;
+  });
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function handleBackdropClick(e){if(e.target===document.getElementById('modal'))closeModal()}
+function saveAndClose(){
+  STATE.currentQuarter=parseInt(document.getElementById('m-quarter').value);
+  STATE.tasks.forEach((_,i)=>{STATE.tasks[i].done=document.getElementById('t'+i).checked});
+  STATE.kpis.forEach((_,i)=>{const el=document.getElementById('ki'+i);if(el)STATE.kpis[i].actual=el.value.trim()});
+  const now=new Date();
+  STATE.lastUpdated=now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'})
+    +' '+now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  closeModal();renderAll();
+}
+renderAll();
+</script>
+</body>
+</html>
